@@ -2,13 +2,18 @@
 package allamvizsga;
 import javax.swing.table.*;
 import edu.stanford.nlp.util.ArrayMap;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Label;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,20 +22,33 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
+import static javafx.scene.paint.Color.color;
+import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.Renderer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
@@ -38,15 +56,21 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PolarPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.ui.RefineryUtilities;
 
 
 public class Form extends javax.swing.JFrame {
@@ -55,6 +79,15 @@ public class Form extends javax.swing.JFrame {
     
     public Form() {
         initComponents();
+        /*showHintLabel.addMouseListener(new MouseAdapter() {
+         public void mouseEntered(MouseEvent evt) {
+            imgLabel.setVisible(true);
+            imgLabel.setText("itt");
+         }
+         public void mouseExited(MouseEvent evt) {
+            imgLabel.setVisible(false);
+         }
+      });*/
     }
 
     
@@ -81,6 +114,8 @@ public class Form extends javax.swing.JFrame {
         subscriberPanelLabel2 = new javax.swing.JLabel();
         subscriberPanelLabel3 = new javax.swing.JLabel();
         subscriberPanelLabel4 = new javax.swing.JLabel();
+        showHintLabel = new javax.swing.JLabel();
+        imgLabel = new javax.swing.JLabel();
 
         label1.setText("label1");
 
@@ -122,23 +157,19 @@ public class Form extends javax.swing.JFrame {
 
         estimatedEarning.setBorder(javax.swing.BorderFactory.createTitledBorder("Estimated Worth"));
 
-        subscriberPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 3));
+        subscriberPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         subscriberPanelLabel1.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
         subscriberPanelLabel1.setForeground(new java.awt.Color(0, 0, 0));
-        subscriberPanelLabel1.setText("AlgoRythmics");
 
         subscriberPanelLabel2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         subscriberPanelLabel2.setForeground(new java.awt.Color(0, 0, 0));
-        subscriberPanelLabel2.setText("should reach");
 
         subscriberPanelLabel3.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
         subscriberPanelLabel3.setForeground(new java.awt.Color(0, 0, 0));
-        subscriberPanelLabel3.setText("30800 Subscribers");
 
         subscriberPanelLabel4.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         subscriberPanelLabel4.setForeground(new java.awt.Color(0, 0, 0));
-        subscriberPanelLabel4.setText("around May 24th 2020");
 
         javax.swing.GroupLayout subscriberPanelLayout = new javax.swing.GroupLayout(subscriberPanel);
         subscriberPanel.setLayout(subscriberPanelLayout);
@@ -148,31 +179,47 @@ public class Form extends javax.swing.JFrame {
                 .addGroup(subscriberPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(subscriberPanelLayout.createSequentialGroup()
                         .addGap(131, 131, 131)
-                        .addComponent(subscriberPanelLabel3))
+                        .addComponent(subscriberPanelLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(subscriberPanelLayout.createSequentialGroup()
                         .addGap(182, 182, 182)
-                        .addComponent(subscriberPanelLabel1))
+                        .addComponent(subscriberPanelLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(subscriberPanelLayout.createSequentialGroup()
                         .addGap(208, 208, 208)
-                        .addComponent(subscriberPanelLabel4))
+                        .addComponent(subscriberPanelLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(subscriberPanelLayout.createSequentialGroup()
                         .addGap(249, 249, 249)
-                        .addComponent(subscriberPanelLabel2)))
+                        .addComponent(subscriberPanelLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(146, Short.MAX_VALUE))
         );
         subscriberPanelLayout.setVerticalGroup(
             subscriberPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(subscriberPanelLayout.createSequentialGroup()
                 .addGap(42, 42, 42)
-                .addComponent(subscriberPanelLabel1)
+                .addComponent(subscriberPanelLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(subscriberPanelLabel2)
+                .addComponent(subscriberPanelLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(subscriberPanelLabel3)
+                .addComponent(subscriberPanelLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(subscriberPanelLabel4)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(subscriberPanelLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                .addContainerGap(46, Short.MAX_VALUE))
         );
+
+        showHintLabel.setText("Show hint");
+        showHintLabel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                showHintLabelMouseMoved(evt);
+            }
+        });
+        showHintLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                showHintLabelMouseClicked(evt);
+            }
+        });
+
+        imgLabel.setIcon(new javax.swing.ImageIcon("C:\\Users\\Alida\\Desktop\\Datamining Pics\\id.png")); // NOI18N
+        imgLabel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        imgLabel.setVisible(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -196,17 +243,22 @@ public class Form extends javax.swing.JFrame {
                                 .addComponent(publishDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(subscriberCount, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(63, 63, 63)
+                                .addGap(45, 45, 45)
                                 .addComponent(totalVideoViews, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(76, 76, 76)
                                 .addComponent(uploadedVideoNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(79, 79, 79)
-                                .addComponent(submitButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(showHintLabel)
+                                        .addGap(43, 43, 43)
+                                        .addComponent(submitButton))
+                                    .addComponent(imgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 510, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
                                 .addComponent(subscriberPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(estimatedEarning, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1))
@@ -215,26 +267,35 @@ public class Form extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(inputChannelUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(submitButton)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(28, 28, 28)
+                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(profilePictureOfChannel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(answer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(subscriberCount)
-                            .addComponent(publishDate)
-                            .addComponent(totalVideoViews)))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(inputChannelUrl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(16, 16, 16)
+                                .addComponent(showHintLabel)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(28, 28, 28)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(profilePictureOfChannel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(answer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(subscriberPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(subscriberPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(uploadedVideoNumber)))
+                        .addGap(19, 19, 19)
+                        .addComponent(submitButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(imgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(subscriberCount, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(publishDate, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(totalVideoViews, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(uploadedVideoNumber))
                 .addGap(18, 18, 18)
                 .addComponent(estimatedEarning)
                 .addGap(27, 27, 27)
@@ -253,10 +314,8 @@ public class Form extends javax.swing.JFrame {
        
        
         String inputID = this.inputChannelUrl.getText();
-        addToChannelsTable(inputID);
-        
-        OutputChannelDataOnPanel(inputID);
         //CollectData(inputID);
+        OutputChannelDataOnPanel(inputID);  
             
         /*
         outputting the channel's video titles 
@@ -280,8 +339,6 @@ public class Form extends javax.swing.JFrame {
         CategoryPlot plot = jchart.getCategoryPlot();
         
         ChartFrame chartFrame = new ChartFrame("View Count of Videos", jchart, true);
-        //chartFrame.setVisible(true);
-        chartFrame.setSize(500, 400);
      
         /*
         Pie chart for sentiment scores of 
@@ -335,13 +392,11 @@ public class Form extends javax.swing.JFrame {
        
         PieSectionLabelGenerator pieLabelGeneratorForLanguages = new StandardPieSectionLabelGenerator(
             "{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0.0%"));
-        piePlotForLanguages.setLabelGenerator(pieLabelGeneratorForLanguages);
+       // piePlotForLanguages.setLabelGenerator(pieLabelGeneratorForLanguages);
         
-       /* JFrame pieChartFrameForLanguages = new JFrame("Test");
-        pieChartFrameForLanguages.setSize(500, 400);*/
         
         /*
-        The week in wich the most comments arrived
+        The week in wich the most comments arrived (Donut Chart)
         */
         
         DefaultPieDataset pieDatasetForCommentTime = new DefaultPieDataset();
@@ -368,25 +423,55 @@ public class Form extends javax.swing.JFrame {
         JFreeChart pieChartForComments = ChartFactory.createRingChart("Week of most comments", pieDatasetForCommentTime, true, true, false);
         PiePlot piePlotForComments = (PiePlot) pieChartForComments.getPlot();
         piePlotForComments.setSimpleLabels(true);
+        
+        /*ArrayMap<String, Integer> videoWeekOfMostCommentsPairs = new ArrayMap();
+        Integer counter = 0;
+        ArrayList<Integer> arrayOfWeekWithMostComments = new ArrayList<Integer>();
+       
+        try {
+            videoWeekOfMostCommentsPairs = DataMining.calculateDuration(inputID);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        videoWeekOfMostCommentsPairs.forEach((key, value) -> arrayOfWeekWithMostComments.add(value));
+        
+       for (Map.Entry<String, Integer> entry : videoWeekOfMostCommentsPairs.entrySet()) {
+           
+           //System.out.println(entry.getKey() + " " + entry.getValue());
+           counter = countOccurancesOfEachWeek(entry.getValue(),arrayOfWeekWithMostComments);
+       }
+       
+       double[][] data = new double[][]{
+        {1},
+        {8},
+        {1},   
+        };
+       //DatasetUtilities.createCategoryDataset("Merge-sort", "Bubble-sort with Hungarian","HEAP-sort with Hungarian", "Quick-sort","LINEAR search with FLAMENCO danc", "Shell-sort","Insert-sort", "BACKTRACKING ballet","BINARY search", "Select-sort", data);
+       ArrayList<Integer> det = new ArrayList<Integer>(Arrays.asList(26, 128, 40));
+       CategoryDataset datasetQ = DatasetUtilities.createCategoryDataset("Week ", "Most", data);
+       
+       JFreeChart chartQ = ChartFactory.createStackedBarChart("Stacked Bar Chart ", "", "Score",datasetQ, PlotOrientation.VERTICAL, true, true, false);
+       ChartPanel chartPanelQ = new ChartPanel(chartQ);*/
+       
+       //setContentPane(chartPanelQ);
        
         /*
        View - Like Ratio
        */
-        DefaultCategoryDataset defaultRatioDataset =  new DefaultCategoryDataset();
+        DefaultCategoryDataset defaultRatioDataset = new DefaultCategoryDataset();
         ArrayMap<String, Double> viewLikeRatios = new ArrayMap();
         try {
             viewLikeRatios = DataMining.getViewAndLikeRatio(inputID);
         } catch (SQLException ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        viewLikeRatios.entrySet().forEach(entry->{
+        viewLikeRatios.entrySet().forEach(entry -> {
             defaultRatioDataset.setValue(entry.getValue(), "View - Like Ratio", entry.getKey());
         });
-
         JFreeChart jchartRatio = ChartFactory.createBarChart("View - Like Ratio of Videos", "Video Title", "Ratio", defaultRatioDataset, PlotOrientation.VERTICAL, true, true, false);
-        CategoryPlot plotRatio = jchartRatio.getCategoryPlot();
         
+
          /*
        View - Dislike Ratio
        */
@@ -404,7 +489,6 @@ public class Form extends javax.swing.JFrame {
         });
 
         JFreeChart jchartDislikeRatio = ChartFactory.createBarChart("View - Dislike Ratio of Videos", "Video Title", "Ratio", defaultDislikeRatioDataset, PlotOrientation.VERTICAL, true, true, false);
-        CategoryPlot plotDislikeRatio = jchartDislikeRatio.getCategoryPlot();
         
         CategoryPlot plotDislike = jchartDislikeRatio.getCategoryPlot();
         BarRenderer barRenderer = (BarRenderer)plotDislike.getRenderer();
@@ -426,7 +510,7 @@ public class Form extends javax.swing.JFrame {
          ArrayList<String> arr = new ArrayList<>();
          HashMap<String,Integer> words = new HashMap<String,Integer>();
         try {
-            arr = WordCloud.getEnglishCommentsFromDatabase(inputID);
+            arr = WordCloud.getEnglishCommentsFromDatabase(inputID,"DaPJkYo2quc");
         } catch (SQLException ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -513,6 +597,9 @@ public class Form extends javax.swing.JFrame {
         dataset 
         );  
     
+        /* mikorra eri el a csatorna a 30800 feliratkozot
+        (linearis regresszio)
+        */
         ArrayList<String> dateAndSubs = new ArrayList<>();
         try {
             dateAndSubs = LinearRegression.Reg(inputID);
@@ -522,15 +609,128 @@ public class Form extends javax.swing.JFrame {
         
         ArrayList<String> channelData = new ArrayList();
         try {
-            channelData = DataMining.getChannelTitleAndProfilePic(inputID);
+            channelData = DataMining.getDataFromChannelsTable(inputID);
         } catch (Exception ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.subscriberPanelLabel1.setText(channelData.get(0));
+        this.subscriberPanelLabel1.setText(channelData.get(3));  
         this.subscriberPanelLabel2.setText("should reach");
         this.subscriberPanelLabel3.setText(dateAndSubs.get(0) + " Subscribers");
         this.subscriberPanelLabel4.setText("around " + dateAndSubs.get(1));
+        
+        /*
+        Bar Chart for years
+        */
+        
+        DefaultCategoryDataset commentCountYearDataset = new DefaultCategoryDataset();
+        ArrayMap<String, Integer> commentNrYear = new ArrayMap();
+        try {
+            commentNrYear = DataMining.CommentCountPerYear(inputID);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        commentNrYear.entrySet().forEach(entry -> {
+            //System.out.println(entry.getKey() + " " + entry.getValue());
+            commentCountYearDataset.setValue(entry.getValue(), "View - Like Ratio", entry.getKey());
+        });
+       
+        JFreeChart jchartCommentNrYear = ChartFactory.createBarChart("Comment count Per Year", "Year", "Comment Count", commentCountYearDataset, PlotOrientation.HORIZONTAL, true, true, false);
+        jchartCommentNrYear.setBackgroundPaint(Color.lightGray);
+        
+        /*CategoryPlot plotCommentYear = jchartCommentNrYear.getCategoryPlot();
+        plotCommentYear.setRangeAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
+        
+        
+        final NumberAxis rangeAxis = (NumberAxis) plotCommentYear.getRangeAxis();
+        rangeAxis.setRange(0.0, 100.0);
+        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());*/
+        
+        /*
+        Gender-Age Distribution of the viewers
+        */
+        String series1 = "Men";
+        String series2 = "Women";
+        DefaultCategoryDataset datasetD = new DefaultCategoryDataset();
+        /*String category1 = "age13-15";
+        String category2 = "age15-18";
+        String category3 = "age18-24";
+        String category4 = "age25-30";
+        String category5 = "age30-";
+
+        DefaultCategoryDataset datasetD = new DefaultCategoryDataset();
+
+        datasetD.addValue(1.0, series1, category1);
+        datasetD.addValue(4.0, series1, category2);
+        datasetD.addValue(3.0, series1, category3);
+        datasetD.addValue(5.0, series1, category4);
+        datasetD.addValue(5.0, series1, category5);
+
+        datasetD.addValue(5.0, series2, category1);
+        datasetD.addValue(6.0, series2, category3);
+        datasetD.addValue(8.0, series2, category4);
+        datasetD.addValue(4.0, series2, category5);*/
+        
+        ArrayList<Double> femalePerc = new ArrayList();
+        ArrayList<Double> maleDistribution = new ArrayList<>();
+        ArrayList<String> categories = new ArrayList<>();
+        try {
+            femalePerc = DataMining.FemalePercentageOfDemographics(inputID);
+            maleDistribution  = DataMining.MalePercentageOfDemographics(inputID);
+            categories = DataMining.AgeGenderPercentage(inputID);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+       
+        for (int i=0;i<categories.size();++i)
+        {
+            String category = categories.get(i);
+            datasetD.addValue(maleDistribution.get(i), series1, category);
+        }
+        for (int i=0;i<categories.size();++i)
+        {
+            String category = categories.get(i);
+            datasetD.addValue(femalePerc.get(i), series2, category);
+        }
+        
+        JFreeChart jchartD = ChartFactory.createBarChart("Demographic-Age distribution", "Age Group", "Percentage", datasetD, PlotOrientation.VERTICAL, true, true, false);
+
+        CategoryPlot plotD = jchartD.getCategoryPlot();
+        BarRenderer barRendererD = (BarRenderer)plotD.getRenderer();
+        barRendererD.setItemMargin(0.0);
+        barRendererD.setSeriesPaint(0, Color.GREEN);
+        
+        /*
+        Age Distribution of Viewers
+        */
+        
+        ArrayList<String> ages = new ArrayList<>();
+        ArrayList<Double> sumPercentages = new ArrayList<>();
+        try {
+            sumPercentages = DataMining.SumOfAgeDistributions(inputID);
+            ages = DataMining.AgeGenderPercentage(inputID);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        DefaultCategoryDataset datasetAgeDistribution = new DefaultCategoryDataset();
+        for(int i=0;i<ages.size();++i)
+        {
+            datasetAgeDistribution.addValue(sumPercentages.get(i), "Dispersion", ages.get(i));
+        }
+       
+
+        JFreeChart chartAgeDistribution = ChartFactory.createLineChart(  
+        "Age distribution of the viewers", // Chart title  
+        "Age Groups", // X-Axis Label  
+        "Percentage", // Y-Axis Label  
+        datasetAgeDistribution 
+        );  
+        
+        CategoryPlot plotAge = (CategoryPlot) chartAgeDistribution.getPlot();
+        plotAge.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f)); // cahnging thickness of the line
+       
         
         /* 
          adding the charts to the analysisPanel
@@ -543,31 +743,92 @@ public class Form extends javax.swing.JFrame {
         ChartPanel chartPanelRatio = new ChartPanel(jchartRatio);
         ChartPanel chartPanelDislikeRatio = new ChartPanel(jchartDislikeRatio);
         ChartPanel chartPanelMonth = new ChartPanel(chart);
-        
+        ChartPanel chartPanelCommentCountPerYaer = new ChartPanel(jchartCommentNrYear);
+        ChartPanel chartPanelDemographics = new ChartPanel(jchartD);
+        ChartPanel chartPanelAgeDistributions = new ChartPanel(chartAgeDistribution);
+     
         analysisPanel.removeAll();
         analysisPanel.add(chartPanel);
         analysisPanel.add(chartPanelRatio);
         analysisPanel.add(chartPanelDislikeRatio);
+        
         analysisPanel.add(wordCloudPanel);
         analysisPanel.add(pieChartPanel);
         analysisPanel.add(pieChartPanelForLanguages); 
         analysisPanel.add(tablePanel);
         analysisPanel.add(pieChartPanelForComments);       
         analysisPanel.add(chartPanelMonth);
-        analysisPanel.updateUI();     
+        analysisPanel.add(chartPanelCommentCountPerYaer);
+        analysisPanel.add(chartPanelDemographics);
+        analysisPanel.add(chartPanelAgeDistributions);
+        analysisPanel.updateUI();    
        
     }//GEN-LAST:event_submitButtonActionPerformed
+
+    private void showHintLabelMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showHintLabelMouseMoved
+        
+        showHintLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+    @Override
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        
+       imgLabel.setVisible(true);
+       Font font = showHintLabel.getFont();
+       Map attributes = font.getAttributes();
+       attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+       showHintLabel.setFont(font.deriveFont(attributes));     
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        
+        imgLabel.setVisible(false);
+        Font font = showHintLabel.getFont();
+        Map attributes = font.getAttributes();
+        attributes.put(TextAttribute.UNDERLINE, -1);
+        showHintLabel.setFont(font.deriveFont(attributes));       
+    }
+});
+       
+    }//GEN-LAST:event_showHintLabelMouseMoved
+    
+    public Form(JPanel analysisPanel, JLabel answer, JLabel estimatedEarning, JLabel imgLabel, JTextField inputChannelUrl, JLabel jLabel1, JLabel jLabel2, JScrollPane jScrollPane1, Label label1, JLabel profilePictureOfChannel, JLabel publishDate, JLabel showHintLabel, JButton submitButton, JLabel subscriberCount, JPanel subscriberPanel, JLabel subscriberPanelLabel1, JLabel subscriberPanelLabel2, JLabel subscriberPanelLabel3, JLabel subscriberPanelLabel4, JLabel totalVideoViews, JLabel uploadedVideoNumber) throws HeadlessException {
+        this.analysisPanel = analysisPanel;
+        this.answer = answer;
+        this.estimatedEarning = estimatedEarning;
+        this.imgLabel = imgLabel;
+        this.inputChannelUrl = inputChannelUrl;
+        this.jLabel1 = jLabel1;
+        this.jLabel2 = jLabel2;
+        this.jScrollPane1 = jScrollPane1;
+        this.label1 = label1;
+        this.profilePictureOfChannel = profilePictureOfChannel;
+        this.publishDate = publishDate;
+        this.showHintLabel = showHintLabel;
+        this.submitButton = submitButton;
+        this.subscriberCount = subscriberCount;
+        this.subscriberPanel = subscriberPanel;
+        this.subscriberPanelLabel1 = subscriberPanelLabel1;
+        this.subscriberPanelLabel2 = subscriberPanelLabel2;
+        this.subscriberPanelLabel3 = subscriberPanelLabel3;
+        this.subscriberPanelLabel4 = subscriberPanelLabel4;
+        this.totalVideoViews = totalVideoViews;
+        this.uploadedVideoNumber = uploadedVideoNumber;
+    }
+    
+    private void showHintLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showHintLabelMouseClicked
+       
+    }//GEN-LAST:event_showHintLabelMouseClicked
 
     public static Integer countOccurancesOfEachWeek (Integer actualWeek, ArrayList<Integer> arrayOfWeeksWithMostComments)
     {
         int counter = 0;
         for(int j = 0;j<arrayOfWeeksWithMostComments.size();++j)
         {
-            if(arrayOfWeeksWithMostComments.get(j) == actualWeek)
+            if(arrayOfWeeksWithMostComments.get(j).equals(actualWeek))
             {
                 counter ++;
             }
         }
+       
         return counter;
     }
     public static ArrayList<Double> countLowerAndUpperBoundOfEarnings(ArrayList<String> basicChannelStatistics)
@@ -580,39 +841,21 @@ public class Form extends javax.swing.JFrame {
         resultSetForEarnings.add(lowerBoundOfEarning); resultSetForEarnings.add(upperBoundOfEarning);
         return resultSetForEarnings;
     }
-    public static void addToChannelsTable(String inputID) {
-        try {
-            Connection con = DataMining.createDatabaseConnection();
-            PreparedStatement truncateTable = con.prepareStatement("INSERT INTO channels (channelId)\n" //inserting the chennelId into the channels table ONLY IF it doesent exist in it already
-                    + "SELECT * FROM (SELECT ?) AS tmp\n"
-                    + "WHERE NOT EXISTS (\n"
-                    + "    SELECT channelId FROM channels WHERE channelId = ?\n"
-                    + ") LIMIT 1;");
-            truncateTable.setString(1,inputID);
-            truncateTable.setString(2,inputID);
-            truncateTable.executeUpdate();
-
-            /* PreparedStatement preparedStatement = con.prepareStatement("insert into channels (channelID) values(?)");
-            preparedStatement.setString(1, inputID);
-            preparedStatement.executeUpdate();*/
-        } catch (SQLException ex) {
-            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+  
     public void OutputChannelDataOnPanel(String inputID)
     {
         ArrayList<String> basicChannelStatistics = new ArrayList();
-        ArrayList<String> channelData = new ArrayList();
+        
         try {
-            basicChannelStatistics = DataMining.getChannelStatistics(inputID);
-            channelData = DataMining.getChannelTitleAndProfilePic(inputID);
-            
+            //basicChannelStatistics = DataMining.getChannelStatistics(inputID);
+            basicChannelStatistics = DataMining.getDataFromChannelsTable(inputID);
+             
         } catch (Exception ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.answer.setText("Channel Title: " + channelData.get(0));
-        this.publishDate.setText(channelData.get(1));
+        this.answer.setText("Channel Title: " + basicChannelStatistics.get(3));
+        this.publishDate.setText(basicChannelStatistics.get(4));
         this.subscriberCount.setText(basicChannelStatistics.get(0));
         this.totalVideoViews.setText(basicChannelStatistics.get(1));
         this.uploadedVideoNumber.setText(basicChannelStatistics.get(2));
@@ -621,7 +864,7 @@ public class Form extends javax.swing.JFrame {
         
         this.estimatedEarning.setText("$" + String.valueOf(earningsResult.get(0)) + " - $" + String.valueOf(earningsResult.get(1)));
          URL url = null;
-        String profilePictureUrl = channelData.get(2);
+        String profilePictureUrl = basicChannelStatistics.get(5);
         Image image = null;
         try {
             //this.profilePictureOfChannel.setSize(20, 20);
@@ -640,28 +883,30 @@ public class Form extends javax.swing.JFrame {
     public static void CollectData(String inputID)
     {
          try {          
-           // DataMining.getVideoStatistics(inputID);  
-            DataMining.getCommentsAndStatistics(inputID);
+            // DataMining.getChannelStatistics(inputID);
+            //DataMining.getVideoStatisticsSpec2(inputID);  
+            DataMining.getCommentsAndStatisticsSpec(inputID);
             
         } catch (Exception ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
     public static void main(String args[]) {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Form().setVisible(true);
-
+                
             }
-        });
-
+        });      
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel analysisPanel;
     private javax.swing.JLabel answer;
     private javax.swing.JLabel estimatedEarning;
+    private static javax.swing.JLabel imgLabel;
     private javax.swing.JTextField inputChannelUrl;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -669,6 +914,7 @@ public class Form extends javax.swing.JFrame {
     private java.awt.Label label1;
     private javax.swing.JLabel profilePictureOfChannel;
     private javax.swing.JLabel publishDate;
+    private static javax.swing.JLabel showHintLabel;
     private javax.swing.JButton submitButton;
     private javax.swing.JLabel subscriberCount;
     private javax.swing.JPanel subscriberPanel;
