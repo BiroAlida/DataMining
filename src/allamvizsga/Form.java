@@ -21,6 +21,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +60,10 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.SymbolAxis;
+import org.jfree.chart.axis.TickUnit;
+import org.jfree.chart.axis.TickUnits;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -65,11 +71,15 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PolarPlot;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RefineryUtilities;
 
 
@@ -424,37 +434,6 @@ public class Form extends javax.swing.JFrame {
         PiePlot piePlotForComments = (PiePlot) pieChartForComments.getPlot();
         piePlotForComments.setSimpleLabels(true);
         
-        /*ArrayMap<String, Integer> videoWeekOfMostCommentsPairs = new ArrayMap();
-        Integer counter = 0;
-        ArrayList<Integer> arrayOfWeekWithMostComments = new ArrayList<Integer>();
-       
-        try {
-            videoWeekOfMostCommentsPairs = DataMining.calculateDuration(inputID);
-        } catch (SQLException ex) {
-            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        videoWeekOfMostCommentsPairs.forEach((key, value) -> arrayOfWeekWithMostComments.add(value));
-        
-       for (Map.Entry<String, Integer> entry : videoWeekOfMostCommentsPairs.entrySet()) {
-           
-           //System.out.println(entry.getKey() + " " + entry.getValue());
-           counter = countOccurancesOfEachWeek(entry.getValue(),arrayOfWeekWithMostComments);
-       }
-       
-       double[][] data = new double[][]{
-        {1},
-        {8},
-        {1},   
-        };
-       //DatasetUtilities.createCategoryDataset("Merge-sort", "Bubble-sort with Hungarian","HEAP-sort with Hungarian", "Quick-sort","LINEAR search with FLAMENCO danc", "Shell-sort","Insert-sort", "BACKTRACKING ballet","BINARY search", "Select-sort", data);
-       ArrayList<Integer> det = new ArrayList<Integer>(Arrays.asList(26, 128, 40));
-       CategoryDataset datasetQ = DatasetUtilities.createCategoryDataset("Week ", "Most", data);
-       
-       JFreeChart chartQ = ChartFactory.createStackedBarChart("Stacked Bar Chart ", "", "Score",datasetQ, PlotOrientation.VERTICAL, true, true, false);
-       ChartPanel chartPanelQ = new ChartPanel(chartQ);*/
-       
-       //setContentPane(chartPanelQ);
        
         /*
        View - Like Ratio
@@ -510,7 +489,7 @@ public class Form extends javax.swing.JFrame {
          ArrayList<String> arr = new ArrayList<>();
          HashMap<String,Integer> words = new HashMap<String,Integer>();
         try {
-            arr = WordCloud.getEnglishCommentsFromDatabase(inputID,"DaPJkYo2quc");
+            arr = WordCloud.getEnglishCommentsFromDatabase(inputID,"ywWBy6J5gz8");
         } catch (SQLException ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -731,6 +710,96 @@ public class Form extends javax.swing.JFrame {
         CategoryPlot plotAge = (CategoryPlot) chartAgeDistribution.getPlot();
         plotAge.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f)); // cahnging thickness of the line
        
+        /*
+        Order in wich the videos are watched
+        */
+           
+        ArrayList<ArrayList<String>> arrayOfVideoOrders = new ArrayList<>();
+        try {
+            arrayOfVideoOrders = DataMining.CommentOrderPerPerson(inputID);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Integer nrOfSeries = arrayOfVideoOrders.get(0).size() ; // annyi series lesz amennyi sorrend van -> ebben az esetben 6
+        XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        
+        for (int j = 1; j < nrOfSeries; ++j) {
+             XYSeries s = new XYSeries("Order of comment: " + j);
+            for (int i = 0; i < arrayOfVideoOrders.size(); ++i) {
+                ArrayList<String> tempArray = new ArrayList<>();
+                tempArray = arrayOfVideoOrders.get(i);
+                if(!tempArray.get(j).equals("0"))
+                {
+                    s.add(Integer.parseInt(tempArray.get(j)), i);
+                }
+                
+            }
+            xySeriesCollection.addSeries(s);
+        }
+        
+        JFreeChart chartO = ChartFactory.createScatterPlot(
+        "Order of Videos ", 
+        "Nummber of comments left", "Videos", xySeriesCollection,PlotOrientation.HORIZONTAL,true,true,false);
+        
+        XYPlot plotO = (XYPlot) chartO.getPlot();
+        
+        String[] videos =  new String[arrayOfVideoOrders.size()];
+        for(int i=0;i<arrayOfVideoOrders.size();++i)
+        {
+            String name = arrayOfVideoOrders.get(i).get(0);
+            String splitArray[] = name.split(" ", 2);
+            String firstWord = splitArray[0]; 
+            videos[i] = firstWord;
+        }
+       
+        SymbolAxis rangeAxis = new SymbolAxis("Videos",videos);
+         if(inputID.equals("UC9m2XDfCnrS4QTzVBTrD89w"))
+        {
+            rangeAxis.setVerticalTickLabels(true);
+        }
+        
+        rangeAxis.setTickUnit(new NumberTickUnit(1));
+        plotO.setRangeAxis(rangeAxis);
+        /*XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        XYSeries s1 = new XYSeries("Elso");      
+        s1.add(3, 0);
+        s1.add(5, 1);
+        s1.add(6, 2);
+        s1.add(3, 3);
+        s1.add(2, 4);
+        s1.add(1, 5);
+        s1.add(9, 6);
+        
+        XYSeries s2 = new XYSeries("Masodik");
+        s2.add(10, 0);
+        s2.add(30, 1);
+        s2.add(2, 2);
+        s2.add(0, 3);
+        s2.add(9, 4);
+        
+        xySeriesCollection.addSeries(s1);
+        xySeriesCollection.addSeries(s2);
+             
+        JFreeChart chartO = ChartFactory.createScatterPlot(
+        "Order of Videos", 
+        "X-Axis", "Y-Axis", xySeriesCollection,PlotOrientation.HORIZONTAL,true,true,false);
+        
+        XYPlot plotO = (XYPlot) chartO.getPlot();
+        //plotO.setForegroundAlpha(0.5f);
+
+        String[] grade =  new String[7];
+        grade[0] = "Quick";
+        grade[1] = "Bubble";
+        grade[2] = "Merge";
+        grade[3] = "Select";
+        grade[4] = "Shell";
+        grade[5] = "Radix";
+        grade[6] = "Gnome";
+             
+        SymbolAxis rangeAxis = new SymbolAxis("Videos",grade);   
+        rangeAxis.setTickUnit(new NumberTickUnit(1));
+        plotO.setRangeAxis(rangeAxis);*/
+        
         
         /* 
          adding the charts to the analysisPanel
@@ -746,6 +815,7 @@ public class Form extends javax.swing.JFrame {
         ChartPanel chartPanelCommentCountPerYaer = new ChartPanel(jchartCommentNrYear);
         ChartPanel chartPanelDemographics = new ChartPanel(jchartD);
         ChartPanel chartPanelAgeDistributions = new ChartPanel(chartAgeDistribution);
+        ChartPanel panelO = new ChartPanel(chartO);
      
         analysisPanel.removeAll();
         analysisPanel.add(chartPanel);
@@ -759,8 +829,13 @@ public class Form extends javax.swing.JFrame {
         analysisPanel.add(pieChartPanelForComments);       
         analysisPanel.add(chartPanelMonth);
         analysisPanel.add(chartPanelCommentCountPerYaer);
-        analysisPanel.add(chartPanelDemographics);
-        analysisPanel.add(chartPanelAgeDistributions);
+        if(inputID.equals("UCIqiLefbVHsOAXDAxQJH7Xw"))
+        {
+            analysisPanel.add(chartPanelDemographics);
+            analysisPanel.add(chartPanelAgeDistributions);
+        }
+        
+        analysisPanel.add(panelO);
         analysisPanel.updateUI();    
        
     }//GEN-LAST:event_submitButtonActionPerformed
@@ -886,6 +961,7 @@ public class Form extends javax.swing.JFrame {
             // DataMining.getChannelStatistics(inputID);
             //DataMining.getVideoStatisticsSpec2(inputID);  
             DataMining.getCommentsAndStatisticsSpec(inputID);
+            DataMining.getReplies(inputID);
             
         } catch (Exception ex) {
             Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
