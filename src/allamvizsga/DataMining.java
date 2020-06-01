@@ -70,6 +70,7 @@ public class DataMining {
     private static ArrayList<String> allDislikeCountOfVideo = new ArrayList<>();
     private static ArrayList<String> allCommentCountOfVideo = new ArrayList<>();
     private static ArrayList<String> allPublishDatesOfVideo = new ArrayList<>();
+    private static ArrayList<Integer> totalTopLevels = new ArrayList<>();
      
     
     public static void main(String[] args) throws LangDetectException {
@@ -78,9 +79,9 @@ public class DataMining {
        
        try {
          
-        
          Form form = new Form();
          form.setVisible(true);
+        
          /*ArrayList<Integer> arrayOfWeeksWithMostComments = new ArrayList<Integer>(Arrays.asList(264, 348, 348, 348, 284, 214, 348, 348, 348, 348, 284, 348, 348, 348, 348, 284, 348, 348, 348, 348, 284, 284, 284, 348, 348, 284));
          Integer actualWeek = 284;
          Integer counter = 0;
@@ -264,23 +265,51 @@ public class DataMining {
         
     }
     
-    public static void getReplies(String inputChannelid)throws Exception {
+    public static void getReplies(String inputChannelId)throws Exception {
+        
         Integer counter = 0;
-         while (true) {
-             String urlAddress = "https://www.googleapis.com/youtube/v3/commentThreads?part=replies&allThreadsRelatedToChannelId=" + inputChannelId + "&key=" + APIKey + "&pageToken=" + token;
-             JSONObject myResponse = makingGetRequest(urlAddress);
-             JSONArray items = new JSONArray(myResponse.getJSONArray("items").toString());
-             for (int i = 0; i < items.length(); i++) {
-                 if (items.getJSONObject(i).has("replies")) {
-                     JSONObject replies = new JSONObject(items.getJSONObject(i).getJSONObject("replies").toString());
-                     //JSONArray comments = new JSONArray(replies.getJSONArray("comments").toString());
-                     System.out.println(replies);
-                     /* for (int j = 0; j < comments.length(); ++j) {
-                                System.out.println(counter);
+        Integer toplevel = 1;
+        while (true) {
+            String urlAddress = "https://www.googleapis.com/youtube/v3/commentThreads?part=replies&allThreadsRelatedToChannelId=" + inputChannelId + "&key=" + APIKey + "&pageToken=" + token;
+            JSONObject myResponse = makingGetRequest(urlAddress);
+            JSONArray items = new JSONArray(myResponse.getJSONArray("items").toString());
+            for (int i = 0; i < items.length(); i++) {
+
+                if (items.getJSONObject(i).has("replies")) {
+
+                    JSONObject replies = new JSONObject(items.getJSONObject(i).getJSONObject("replies").toString());
+                    JSONArray comments = new JSONArray(replies.getJSONArray("comments").toString());
+
+                    for (int j = 0; j < comments.length(); ++j) {
+                       
+                        JSONObject snippet = new JSONObject(comments.getJSONObject(j).getJSONObject("snippet").toString());
+                        if (snippet.has("videoId")) {
+                            String videoIdReply = snippet.getString("videoId");
+                            if (videoIdReply.equals("DNbd1EFQ_1o") || videoIdReply.equals("r-erNO-WICo") || videoIdReply.equals("ZSJGf5Ngw18") || videoIdReply.equals("NVIjHj-lrT4") || videoIdReply.equals("vIDkfrSdID8") || videoIdReply.equals("QbRoyhGdjnA") || videoIdReply.equals("q4wzJ_uw4aE") || videoIdReply.equals("uc5LdcqrblQ") || videoIdReply.equals("DaPJkYo2quc") || videoIdReply.equals("Xu5ia5x2Vsw") || videoIdReply.equals("AYehFa-oKCA") || videoIdReply.equals("ob49RukGnAw") || videoIdReply.equals("7AX3p8y4s9c") || videoIdReply.equals("67ta5WTjjUo") || videoIdReply.equals("Tmq1UkL7xeU") || videoIdReply.equals("EdcWAw4Hcu0") || videoIdReply.equals("njClLBoEbfI") || videoIdReply.equals("LyRWppObda4") || videoIdReply.equals("Cq7SMsQBEUw") || videoIdReply.equals("ZRPoEKHXTJg") || videoIdReply.equals("_bkow6IykGM") || videoIdReply.equals("8oJS1BMKE64") || videoIdReply.equals("9IqV6ZSjuaI") || videoIdReply.equals("8hEyhs3OV1w") || videoIdReply.equals("92BfuxHn2XE") || videoIdReply.equals("n4sk-SzGvZA")) {
                                 counter++;
-                                JSONObject snippetReplies = new JSONObject(comments.getJSONObject(i).getJSONObject("snippet").toString());
-                                System.out.println(snippetReplies);*/
-                                /*String videoIdReply = snippetReplies.getString("videoId");
+                                System.out.println(counter);
+                                String text = snippet.getString("textOriginal");
+                                Integer likeReply = snippet.getInt("likeCount");
+                                String publishedAtReply = snippet.getString("publishedAt").toString();
+                                JSONObject authorChannelIdReply = new JSONObject(snippet.getJSONObject("authorChannelId").toString());
+                                String authorChannelIdValue = authorChannelIdReply.getString("value");
+                                String languageOfComment = DataMining.detectLanguage(text);
+                                int sentimentScore = 0;
+                                sentimentScore = detectSentimentOfComment(text, languageOfComment);
+
+                                totalVideoIds.add(videoIdReply);
+                                totalComments.add(text);
+                                totalLikeCounts.add(likeReply);
+                                totalPublishDates.add(publishedAtReply);
+                                totalLanguages.add(languageOfComment);
+                                totalAuthorChannelIds.add(authorChannelIdValue);
+                                sentimentScores.add(sentimentScore);
+                            }
+                        }
+
+                    }
+
+                    /*String videoIdReply = snippetReplies.getString("videoId");
                                 if (videoIdReply.equals("DNbd1EFQ_1o") || videoIdReply.equals("r-erNO-WICo") || videoIdReply.equals("ZSJGf5Ngw18") || videoIdReply.equals("NVIjHj-lrT4") || videoIdReply.equals("vIDkfrSdID8") || videoIdReply.equals("QbRoyhGdjnA") || videoIdReply.equals("q4wzJ_uw4aE") || videoIdReply.equals("uc5LdcqrblQ") || videoIdReply.equals("DaPJkYo2quc") || videoIdReply.equals("Xu5ia5x2Vsw") || videoIdReply.equals("AYehFa-oKCA") || videoIdReply.equals("ob49RukGnAw") || videoIdReply.equals("7AX3p8y4s9c") || videoIdReply.equals("67ta5WTjjUo") || videoIdReply.equals("Tmq1UkL7xeU") || videoIdReply.equals("EdcWAw4Hcu0") || videoIdReply.equals("njClLBoEbfI") || videoIdReply.equals("LyRWppObda4") || videoIdReply.equals("Cq7SMsQBEUw") || videoIdReply.equals("ZRPoEKHXTJg") || videoIdReply.equals("_bkow6IykGM") || videoIdReply.equals("8oJS1BMKE64") || videoIdReply.equals("9IqV6ZSjuaI") || videoIdReply.equals("8hEyhs3OV1w") || videoIdReply.equals("92BfuxHn2XE") || videoIdReply.equals("n4sk-SzGvZA"))
                                 {
                                     String reply = snippetReplies.getString("textOriginal");
@@ -289,25 +318,25 @@ public class DataMining {
                                     String publishedAtReply = snippetReplies.getString("publishedAt").toString();
                                     JSONObject authorChannelIdReply = new JSONObject(snippetReplies.getJSONObject("authorChannelId").toString());
                                    
-                                }  */            
-                        // }
-                     
-                 }
-             }
-             
-              if (myResponse.has("nextPageToken")) {
+                                }  */
+                }
+            }
+
+            if (myResponse.has("nextPageToken")) {
                 token = myResponse.getString("nextPageToken");
 
             } else {
                 System.out.println("No more pages available");
                 break;
             }
-         }
+        }
+        addToCommentsTable(totalVideoIds, totalComments, totalLikeCounts, totalPublishDates, totalLanguages, totalAuthorChannelIds, sentimentScores, toplevel);
+
     }
  
      public static void getCommentsAndStatisticsSpec(String inputChannelId) throws Exception {
    
-         Integer counter = 0;
+         Integer counter = 0,toplevelComment=0;
          while (true) {
 
              //String urlAddress = "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&allThreadsRelatedToChannelId=" + inputChannelId + "&key=" + APIKey + "&pageToken=" + token;
@@ -386,12 +415,12 @@ public class DataMining {
             }
          }
 
-         addToCommentsTable(totalVideoIds, totalComments, totalLikeCounts, totalPublishDates, totalLanguages, totalAuthorChannelIds, sentimentScores, inputChannelId);
+         addToCommentsTable(totalVideoIds, totalComments, totalLikeCounts, totalPublishDates, totalLanguages, totalAuthorChannelIds, sentimentScores, toplevelComment);
    }
  
     public static void getCommentsAndStatistics(String inputChannelId) throws Exception {
    
-        Integer counter = 0;
+        Integer counter = 0,toplevelComment = 0;
         while (true) {
                
             String urlAddress = "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&allThreadsRelatedToChannelId=" + inputChannelId + "&key=" + APIKey + "&pageToken=" + token;
@@ -451,7 +480,7 @@ public class DataMining {
 
         }
         
-        addToCommentsTable(totalVideoIds, totalComments, totalLikeCounts, totalPublishDates, totalLanguages, totalAuthorChannelIds, sentimentScores, inputChannelId);
+        addToCommentsTable(totalVideoIds, totalComments, totalLikeCounts, totalPublishDates, totalLanguages, totalAuthorChannelIds, sentimentScores, toplevelComment);
 
    }
     
@@ -639,7 +668,7 @@ public class DataMining {
 
     }
 
-     public static void addToCommentsTable(ArrayList<String> videoId, ArrayList<String> comment, ArrayList<Integer> likeCount, ArrayList<String> publishedAt, ArrayList<String> language, ArrayList<String> channelId, ArrayList<Integer> sentiment, String inputChannelId) {
+     public static void addToCommentsTable(ArrayList<String> videoId, ArrayList<String> comment, ArrayList<Integer> likeCount, ArrayList<String> publishedAt, ArrayList<String> language, ArrayList<String> channelId, ArrayList<Integer> sentiment, Integer toplevel) {
        
          try {
 
@@ -655,7 +684,7 @@ public class DataMining {
                      dateOfPublish = resultSet.getString(1);
                  }*/
 
-                 PreparedStatement preparedStatement = con.prepareStatement("insert into comments (videoId,text,likeCount,publishedAt,language,authorChannelId,sentimentScore) values(?,?,?,?,?,?,?)");
+                 PreparedStatement preparedStatement = con.prepareStatement("insert into comments (videoId,text,likeCount,publishedAt,language,authorChannelId,sentimentScore,toplevel) values(?,?,?,?,?,?,?,?)");
                  preparedStatement.setString(1, videoId.get(i));
                  preparedStatement.setString(2, comment.get(i));
                  preparedStatement.setInt(3, likeCount.get(i));
@@ -665,6 +694,7 @@ public class DataMining {
                  preparedStatement.setString(5, language.get(i));
                  preparedStatement.setString(6, channelId.get(i));
                  preparedStatement.setInt(7, sentiment.get(i));
+                 preparedStatement.setInt(8, toplevel);
                  preparedStatement.executeUpdate();
 
              }
@@ -811,15 +841,15 @@ public class DataMining {
         Connection connection = createDatabaseConnection();
         PreparedStatement numberOfPositiveComments = connection.prepareStatement("select count(commentsId) \n" +
                                                                                  "from comments c join videos v on c.videoId = v.videoId join channels ch on v.channelId = ch.channelId \n"
-                                                                                 + " where (sentimentScore = 3 or sentimentScore = 4) and ch.channelId = ?;");
+                                                                                 + " where (sentimentScore = 3 or sentimentScore = 4) and ch.channelId = ? and c.toplevel = 0;");
         numberOfPositiveComments.setString(1,inputChannelId);
         PreparedStatement numberOfNeutralComments = connection.prepareStatement("select count(commentsId) \n" +
                                                                                 "from comments c join videos v on c.videoId = v.videoId join channels ch on v.channelId = ch.channelId\n" +
-                                                                                "where sentimentScore = 2 and ch.channelId = ?;");
+                                                                                "where sentimentScore = 2 and ch.channelId = ? and c.toplevel = 0;");
         numberOfNeutralComments.setString(1,inputChannelId);
         PreparedStatement numberOfNegativeComments = connection.prepareStatement("select count(c.commentsId) \n" +
                                                                                  "from comments c join videos v on c.videoId = v.videoId join channels ch on v.channelId = ch.channelId\n" +
-                                                                                 "where (sentimentScore = 0 or sentimentScore = 1) and ch.channelId = ?;");
+                                                                                 "where (sentimentScore = 0 or sentimentScore = 1) and ch.channelId = ? and c.toplevel = 0;");
         numberOfNegativeComments.setString(1,inputChannelId);
         
         ResultSet positiveCountResult = numberOfPositiveComments.executeQuery();
@@ -911,8 +941,7 @@ public class DataMining {
            videoWeekOfMostCommentsPairs.put(title, maxIndex);         
         }
         
-       //videoWeekOfMostCommentsPairs.forEach((key, value) -> System.out.println(key + ":" + value));
-      
+       //videoWeekOfMostCommentsPairs.forEach((key, value) -> System.out.println(key + ":" + value));      
        return videoWeekOfMostCommentsPairs;
     }
      
@@ -1036,7 +1065,7 @@ public class DataMining {
         String authorChannelId,nr = null,videoTitle;
         PreparedStatement numberOfCommenters = connection.prepareStatement("select count(distinct(c.authorChannelId)) \n" +
                                                                            "from comments c join videos v on c.videoId = v.videoId\n" +
-                                                                           "where v.channelId = ?;");
+                                                                           "where v.channelId = ? and c.toplevel = 0;");
         numberOfCommenters.setString(1,inputChannelId);
         ResultSet nrCommenters = numberOfCommenters.executeQuery();
         if(nrCommenters.next())
@@ -1048,7 +1077,7 @@ public class DataMining {
        // ki hany videohoz kommentelt
         PreparedStatement commentNumberPerPerson = connection.prepareStatement("select c.authorChannelId, count(distinct(c.videoId))\n" +
                                                                                "from comments c join videos v on c.videoId = v.videoId\n" +
-                                                                               "where v.channelId = ?\n" + 
+                                                                               "where v.channelId = ? and c.toplevel = 0 \n" + 
                                                                                "group by c.authorChannelId\n" +
                                                                                 "order by count(distinct(c.videoId)) desc;");
         commentNumberPerPerson.setString(1,inputChannelId);
@@ -1063,7 +1092,7 @@ public class DataMining {
             if(numberOfVideos > 1)
             {
                 PreparedStatement personsCommentCount = connection.prepareStatement("select distinct(v.title) from videos v join comments c on v.videoId = c.videoId\n" +
-                                                                                    "where c.authorChannelId = ? and v.channelId = ?;");
+                                                                                    "where c.authorChannelId = ? and v.channelId = ? and c.toplevel = 0;");
                 personsCommentCount.setString(1,authorChannelId);
                 personsCommentCount.setString(2,inputChannelId);
                 ResultSet personsCommentCountResult = personsCommentCount.executeQuery();
@@ -1321,5 +1350,134 @@ public class DataMining {
 
         return sumAges;
     }
+    public static Boolean exists(ArrayList<String> array, String element)
+    {
+        for(int i=0;i<array.size();++i)
+        {
+            if(array.get(i).equals(element))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
    
+    public static ArrayList<ArrayList<String>> CommentOrderPerPerson(String inputChannelId) throws SQLException
+    {
+        ArrayList<ArrayList<String>> listOfTitles = new ArrayList<>();
+        ArrayList<String> listWithDuplicates = new ArrayList<>();
+        ArrayList<String> listNoDuplicates = new ArrayList<>();
+        ArrayList<ArrayList<String>> array = new ArrayList<>();
+        Connection connection = createDatabaseConnection();
+        String authorChannelId = null;
+        PreparedStatement statement = connection.prepareStatement("select b.temp, b.authorChannelId\n" +
+                                                                    "from\n" +
+                                                                    "	(select c.authorChannelId, count(distinct(c.videoId)) as temp\n" +
+                                                                    "	from comments c join videos v on c.videoId = v.videoId\n" +
+                                                                    "	where v.channelId = ? \n" +
+                                                                    "	group by c.authorChannelId\n" +
+                                                                    "	order by count(distinct(c.videoId)) desc) b\n" +
+                                                                    "where b.temp > 1\n" +
+                                                                    "order by b.temp asc;");
+        statement.setString(1,inputChannelId);
+        ResultSet result = statement.executeQuery();
+       
+                
+        while(result.next())
+        {
+            authorChannelId = result.getString(2);
+ 
+            PreparedStatement statement2 = connection.prepareStatement("select UNIX_TIMESTAMP(c.publishedAt) as date, v.title from comments c join videos v on c.videoId = v.videoId join channels ch on v.channelId = ch.channelId\n" +
+                                                                        "where ch.channelId = ? and c.authorChannelId = ?\n" +
+                                                                        "order by date asc;");
+            statement2.setString(1,inputChannelId);
+            statement2.setString(2,authorChannelId);
+            listWithDuplicates = new ArrayList<>();
+            listNoDuplicates = new ArrayList<>();
+            ResultSet result2 = statement2.executeQuery();
+            while(result2.next())
+            {
+                listWithDuplicates.add(result2.getString(2));
+            }
+            
+             for(int i=0;i<listWithDuplicates.size();++i)
+            {
+                String temp = listWithDuplicates.get(i);
+                
+                for (int j=0; j<= i ;++j)
+                {
+                   
+                    if(!exists(listNoDuplicates,temp))
+                    {
+                        listNoDuplicates.add(temp);
+                    }
+                   
+                }
+                
+            }
+            listOfTitles.add(listNoDuplicates);       
+        }
+        
+        array = CountOrderOfVideos(inputChannelId,listOfTitles);
+        return array;
+    }
+    
+     public static ArrayList<ArrayList<String>> CountOrderOfVideos(String inputChannelId, ArrayList<ArrayList<String>> array) throws SQLException
+    {
+        Connection connection = createDatabaseConnection();
+        ArrayList<String> videos = new ArrayList<>();
+        ArrayList<ArrayList<String>> arrayOfVideoOrders = new ArrayList<>();
+      
+        Integer maxSize = array.get(array.size() - 1).size();
+        
+        PreparedStatement statement = connection.prepareStatement("select title from videos where channelId =?;");
+        statement.setString(1, inputChannelId);
+        ResultSet result = statement.executeQuery();
+        while (result.next()) {
+            videos.add(result.getString(1));
+        }
+        for (int x = 0; x < videos.size(); ++x) {
+            String title = videos.get(x);
+
+            ArrayList<Integer> counter = new ArrayList<Integer>(Collections.nCopies(maxSize, 0));
+
+            for (int i = 0; i < array.size(); ++i) {
+
+                ArrayList<String> tempArray = new ArrayList<>();
+                tempArray = array.get(i);
+
+                for (int k = 0; k < counter.size(); ++k) {
+
+                    if (tempArray.size() - 1 < k) {
+                        counter.set(k, 0);
+                    } else {
+
+                        if (tempArray.get(k).equals(title)) {
+
+                            counter.set(k, counter.get(k) + 1);
+
+                        }
+                    }
+
+                }
+
+            }
+            ArrayList<String> content = new ArrayList<>();
+            content.add(title);
+            for(int y=0;y<counter.size();++y)
+            {
+                
+                content.add(counter.get(y).toString());
+            }
+            
+            arrayOfVideoOrders.add(content);
+        }
+        /*for (int i = 0; i < arrayOfVideoOrders.size(); ++i) {
+            ArrayList<String> tempArray = new ArrayList<>();
+            tempArray = arrayOfVideoOrders.get(i);
+            System.out.println(tempArray);
+
+        }*/
+        return arrayOfVideoOrders;
+    }
 }
